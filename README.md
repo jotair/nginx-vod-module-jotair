@@ -20,9 +20,9 @@
 
 * Fallback support for file not found in local/mapped modes (useful in multi-datacenter environments)
   
-* Video codecs: H264, H265 (DASH/HLS), VP9 (DASH)
+* Video codecs: H264, H265 (DASH/HLS), VP8 (DASH), VP9 (DASH), AV1 (DASH)
 
-* Audio codecs: AAC, MP3 (HLS/HDS/MSS), AC-3 (DASH/HLS), E-AC-3 (DASH/HLS), OPUS (DASH)
+* Audio codecs: AAC, MP3 (HLS/HDS/MSS), AC-3 (DASH/HLS), E-AC-3 (DASH/HLS), VORBIS (DASH), OPUS (DASH), FLAC (HLS), DTS (HLS)
 
 * Captions support - 
   
@@ -144,7 +144,7 @@ For Ubuntu 16.04, 16.10 add this repo:
 For Ubuntu 20.04 add this repo:
 ```
 # wget -O - http://installrepo.kaltura.org/repo/aptn/focal/kaltura-deb-256.gpg.key|apt-key add -
-# echo "deb [arch=amd64] http://installrepo.kaltura.org/repo/apt/xenial propus main" > /etc/apt/sources.list.d/kaltura.list
+# echo "deb [arch=amd64] http://installrepo.kaltura.org/repo/aptn/focal propus main" > /etc/apt/sources.list.d/kaltura.list
 ```
 
 
@@ -466,6 +466,10 @@ Optional fields:
 	Setting this parameter is equivalent to passing /clipTo/ on the URL.
 * `cache` - boolean, if set to false, the mapping response will not be saved to cache (vod_mapping_cache).
 	The default value is true.
+* `closedCaptions` - array of closed captions objects (see below), containing languages and ids
+	of any embedded CEA-608 / CEA-708 captions. If an empty array is provided, the module will output
+	`CLOSED-CAPTIONS=NONE` on each `EXT-X-STREAM-INF` tag. If the list does not appear in the JSON, the 
+	module will not output any `CLOSED-CAPTIONS` fields in the playlist.
 	
 Live fields:
 * `firstClipTime` - integer, mandatory for all live playlists unless `clipTimes` is specified.
@@ -635,6 +639,17 @@ Mandatory fields:
 	the beginning of the concat clip.
 * `id` - a string that identifies the notification, this id can be referenced by `vod_notification_uri`
 	using the variable `$vod_notification_id`
+
+#### Closed Captions
+
+Mandatory fields:
+* `id` - a string that identifies the embedded captions. This will become the `INSTREAM-ID` field and must
+have one of the following values: `CC1`, `CC3`, `CC3`, `CC4`, or `SERVICEn`, where `n` is between 1 and 63.
+* `label` - a friendly string that indicates the language of the closed caption track.
+
+Optional fields:
+* `language` - a 3-letter (ISO-639-2) language code that indicates the language of the closed caption track.
+
 
 ### Security
 
@@ -1657,6 +1672,14 @@ padding is added as needed.
 
 When enabled, an ID3 TEXT frame will be outputted in each TS segment, containing a JSON with the absolute segment timestamp.
 The timestamp is measured in milliseconds since the epoch (unixtime x 1000), the JSON structure is: `{"timestamp":1459779115000}`
+
+#### vod_hls_mpegts_align_pts
+* **syntax**: `vod_hls_mpegts_align_pts on/off`
+* **default**: `off`
+* **context**: `http`, `server`, `location`
+
+When enabled, the module will shift back the dts timestamps by the pts delay of the initial frame.
+This can help keep the pts timestamps aligned across multiple renditions.
 
 ### Configuration directives - MSS
 
