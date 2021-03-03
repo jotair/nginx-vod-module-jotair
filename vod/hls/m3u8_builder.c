@@ -975,19 +975,21 @@ m3u8_builder_ext_x_media_tags_write(
 		// output EXT-X-MEDIA
 		if (media_type == MEDIA_TYPE_AUDIO)
 		{
-			group_index = tracks[media_type]->media_info.codec_id - VOD_CODEC_ID_AUDIO;
+			group_index = 8;//tracks[media_type]->media_info.codec_id - VOD_CODEC_ID_AUDIO;
+			
 		}
 		else
 		{
 			group_index = 0;
 		}
 
-		label = &tracks[media_type]->media_info.label;
-		if (label->len == 0 ||
-			(media_type == MEDIA_TYPE_AUDIO && !adaptation_sets->multi_audio))
-		{
-			label = &default_label;
-		}
+		label = &tracks[media_type]->media_info.codec_name;
+//		if (label->len == 0 ||
+//			(media_type == MEDIA_TYPE_AUDIO && !adaptation_sets->multi_audio))
+//		{
+//			//label = &default_label;
+//			label = &flac_label;
+//		}
 
 		p = vod_sprintf(p, M3U8_EXT_MEDIA_BASE,
 			type,
@@ -1158,7 +1160,8 @@ m3u8_builder_write_variants(
 
 		if (adaptation_sets->count[ADAPTATION_TYPE_AUDIO] > 0 && adaptation_sets->total_count > 1)
 		{
-			p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, group_audio_track->media_info.codec_id - VOD_CODEC_ID_AUDIO);
+			p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, 8);
+///			p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, group_audio_track->media_info.codec_id - VOD_CODEC_ID_AUDIO);
 		}
 		if (adaptation_sets->count[ADAPTATION_TYPE_SUBTITLE] > 0)
 		{
@@ -1422,10 +1425,15 @@ m3u8_builder_build_master_playlist(
 
 	// write the header
 	p = vod_copy(result->data, m3u8_header, sizeof(m3u8_header) - 1);
+	
+	vod_log_debug0(VOD_LOG_DEBUG_LEVEL, request_context->log, 0,
+			"write mm3u8 AUDIOp");
 
 	if (alternative_audio)
 	{
 		// output alternative audio 
+		vod_log_debug0(VOD_LOG_DEBUG_LEVEL, request_context->log, 0,
+			"write mm3u8 AUDIOpp");
 		p = m3u8_builder_ext_x_media_tags_write(
 			p,
 			&adaptation_sets,
@@ -1433,6 +1441,8 @@ m3u8_builder_build_master_playlist(
 			base_url,
 			media_set,
 			MEDIA_TYPE_AUDIO);
+		
+
 	}
 
 	if (adaptation_sets.count[ADAPTATION_TYPE_SUBTITLE] > 0)
