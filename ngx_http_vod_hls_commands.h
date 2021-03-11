@@ -44,6 +44,13 @@
 	BASE_OFFSET + offsetof(ngx_http_vod_hls_loc_conf_t, m3u8_config.container_format),
 	hls_container_formats },
 
+	{ ngx_string("vod_hls_permanent_audio_group_id"),
+	NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
+	ngx_conf_set_flag_slot,
+	NGX_HTTP_LOC_CONF_OFFSET,
+	BASE_OFFSET + offsetof(ngx_http_vod_hls_loc_conf_t, m3u8_config.permanent_audio_group_id),
+	NULL },
+
 	{ ngx_string("vod_hls_absolute_master_urls"),
 	NGX_HTTP_MAIN_CONF | NGX_HTTP_SRV_CONF | NGX_HTTP_LOC_CONF | NGX_CONF_TAKE1,
 	ngx_conf_set_flag_slot,

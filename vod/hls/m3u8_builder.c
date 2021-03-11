@@ -973,16 +973,20 @@ m3u8_builder_ext_x_media_tags_write(
 		tracks[media_type] = adaptation_set->first[0];
 
 		// output EXT-X-MEDIA
-		if (media_type == MEDIA_TYPE_AUDIO)
+		if(conf->permanent_audio_group_id)
 		{
-			group_index = 8;//tracks[media_type]->media_info.codec_id - VOD_CODEC_ID_AUDIO;
+			group_index = 8;
+		}else{
+			if (media_type == MEDIA_TYPE_AUDIO)
+			{
+				group_index = tracks[media_type]->media_info.codec_id - VOD_CODEC_ID_AUDIO;
 			
+			}
+			else
+			{
+				group_index = 0;
+			}
 		}
-		else
-		{
-			group_index = 0;
-		}
-
 		label = &tracks[media_type]->media_info.codec_name;
 //		if (label->len == 0 ||
 //			(media_type == MEDIA_TYPE_AUDIO && !adaptation_sets->multi_audio))
@@ -1160,8 +1164,12 @@ m3u8_builder_write_variants(
 
 		if (adaptation_sets->count[ADAPTATION_TYPE_AUDIO] > 0 && adaptation_sets->total_count > 1)
 		{
-			p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, 8);
-///			p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, group_audio_track->media_info.codec_id - VOD_CODEC_ID_AUDIO);
+			if(conf->permanent_audio_group_id)
+			{
+				p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, 8);
+			}else{
+				p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, group_audio_track->media_info.codec_id - VOD_CODEC_ID_AUDIO);
+			}		
 		}
 		if (adaptation_sets->count[ADAPTATION_TYPE_SUBTITLE] > 0)
 		{

@@ -21,6 +21,7 @@ enum {
 typedef struct {
 	int m3u8_version;
 	vod_uint_t container_format;
+	ngx_flag_t permanent_audio_group_id;
 	u_char iframes_m3u8_header[MAX_IFRAMES_M3U8_HEADER_SIZE];
 	size_t iframes_m3u8_header_len;
 	bool_t force_unmuxed_segments;

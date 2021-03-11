@@ -67,7 +67,9 @@ ngx_http_vod_hls_get_container_format(
 		return conf->m3u8_config.container_format;
 	}
 
-	if (media_set->filtered_tracks[0].media_info.codec_id == VOD_CODEC_ID_HEVC ||
+	if (media_set->filtered_tracks[0].media_info.codec_id == VOD_CODEC_ID_HEVC || 
+		media_set->filtered_tracks[0].media_info.codec_id == VOD_CODEC_ID_FLAC ||
+		media_set->filtered_tracks[0].media_info.codec_id == VOD_CODEC_ID_EAC3 ||
 		conf->encryption_method == HLS_ENC_SAMPLE_AES_CENC)
 	{
 		return HLS_CONTAINER_FMP4;
@@ -988,6 +990,7 @@ ngx_http_vod_hls_create_loc_conf(
 	conf->m3u8_config.output_iframes_playlist = NGX_CONF_UNSET;
 	conf->m3u8_config.force_unmuxed_segments = NGX_CONF_UNSET;
 	conf->m3u8_config.container_format = NGX_CONF_UNSET_UINT;
+	conf->m3u8_config.permanent_audio_group_id = NGX_CONF_UNSET;
 }
 
 static char *
@@ -1001,6 +1004,7 @@ ngx_http_vod_hls_merge_loc_conf(
 	ngx_conf_merge_value(conf->absolute_index_urls, prev->absolute_index_urls, 1);
 	ngx_conf_merge_value(conf->absolute_iframe_urls, prev->absolute_iframe_urls, 0);
 	ngx_conf_merge_value(conf->m3u8_config.output_iframes_playlist, prev->m3u8_config.output_iframes_playlist, 1);
+	ngx_conf_merge_value(conf->m3u8_config.permanent_audio_group_id, prev->m3u8_config.permanent_audio_group_id, 0);
 
 	ngx_conf_merge_str_value(conf->master_file_name_prefix, prev->master_file_name_prefix, "master");
 	ngx_conf_merge_str_value(conf->m3u8_config.index_file_name_prefix, prev->m3u8_config.index_file_name_prefix, "index");
