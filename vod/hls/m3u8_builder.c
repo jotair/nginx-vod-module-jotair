@@ -975,7 +975,7 @@ m3u8_builder_ext_x_media_tags_write(
 		// output EXT-X-MEDIA
 		if(conf->permanent_audio_group_id)
 		{
-			group_index = 8;
+			group_index = 0;
 		}else{
 			if (media_type == MEDIA_TYPE_AUDIO)
 			{
@@ -1166,7 +1166,7 @@ m3u8_builder_write_variants(
 		{
 			if(conf->permanent_audio_group_id)
 			{
-				p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, 8);
+				p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, 0);
 			}else{
 				p = vod_sprintf(p, M3U8_STREAM_TAG_AUDIO, group_audio_track->media_info.codec_id - VOD_CODEC_ID_AUDIO);
 			}		
