@@ -93,7 +93,7 @@
 	"      <AudioChannelConfiguration\n"										\
 	"          schemeIdUri=\"urn:mpeg:dash:23003:3:"							\
 								"audio_channel_configuration:2011\"\n"			\
-	"          value=\"1\"/>\n"
+	"          value=\"2\"/>\n"
 
 #define VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG_EAC3								\
 	"      <AudioChannelConfiguration\n"										\
@@ -297,6 +297,7 @@ static dash_codec_info_t dash_codecs[VOD_CODEC_ID_COUNT] = {
 	{ vod_string("audio/webm"),	vod_string("webm"), vod_string("webm")	},		// vorbis
 	{ vod_string("audio/webm"),	vod_string("webm"), vod_string("webm")	},		// opus
 	{ vod_null_string,			vod_null_string,	vod_null_string		},		// volumemap
+	{ vod_string("audio/mp4"),	vod_string("mp4"),	vod_string("m4s")	},		// flac
 
 	{ vod_string("application/mp4"), vod_string("mp4"),	vod_string("ttml") },	// webvtt
 };

@@ -502,7 +502,7 @@ codec_config_get_audio_codec_name(request_context_t* request_context, media_info
 		return VOD_OK;
 
 	case VOD_CODEC_ID_FLAC:
-		codec_config_copy_string(media_info->codec_name, "fLaC");
+		codec_config_copy_string(media_info->codec_name, "flac");
 		return VOD_OK;
 
 	default:
