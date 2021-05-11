@@ -101,6 +101,9 @@
 								"audio_channel_configuration:2011\"\n"			\
 	"          value=\"%uxD\"/>\n"
 
+#define VOD_DASH_MANIFEST_ROLE_AUDIO										\
+	"        <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"%s\"/>\n"
+
 #define VOD_DASH_MANIFEST_REPRESENTATION_HEADER_AUDIO							\
 	"      <Representation\n"													\
 	"          id=\"%V\"\n"														\
@@ -200,6 +203,9 @@
 #define MAX_INDEX_SHIFT_LENGTH (sizeof("i-") + VOD_INT32_LEN)
 #define MAX_MIME_TYPE_SIZE (sizeof("video/webm") - 1)
 #define MAX_FILE_EXT_SIZE (sizeof("webm") - 1)
+#define MAX_AUDIO_ROLE_LENGTH (sizeof("alternate")-1)
+
+#define FIRST_AUDIO  "f1-a1-x3"
 
 //typedefs
 typedef struct {
@@ -735,6 +741,7 @@ dash_packager_write_mpd_period(
 	uint32_t max_height = 0;
 	uint32_t max_framerate_duration = 0;
 	uint32_t segment_count = 0;
+	uint32_t audio_count = 0;
 	uint32_t start_number;
 	uint32_t media_type;
 	uint32_t adapt_id = 1;
@@ -1026,6 +1033,15 @@ dash_packager_write_mpd_period(
 				break;
 
 			case MEDIA_TYPE_AUDIO:
+				if(audio_count==0)
+				{
+					p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "main");
+					audio_count++;
+				}
+				else
+				{
+					p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "alternate");
+				}
 				p = vod_sprintf(p,
 					VOD_DASH_MANIFEST_REPRESENTATION_HEADER_AUDIO,
 					&representation_id,
@@ -1384,6 +1400,8 @@ dash_packager_build_mpd(
 			// audio adaptations
 			(sizeof(VOD_DASH_MANIFEST_ADAPTATION_HEADER_AUDIO_LANG) - 1 + sizeof(VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG_EAC3) - 1 + 2 * VOD_INT32_LEN + LANG_ISO639_3_LEN +
 			sizeof(VOD_DASH_MANIFEST_ADAPTATION_FOOTER) - 1) * context.adaptation_sets.count[ADAPTATION_TYPE_AUDIO] +
+			// audio role
+			(sizeof(VOD_DASH_MANIFEST_ROLE_AUDIO) - 1) + MAX_AUDIO_ROLE_LENGTH +
 			// audio representations
 			(sizeof(VOD_DASH_MANIFEST_REPRESENTATION_HEADER_AUDIO) - 1 + MAX_TRACK_SPEC_LENGTH + MAX_MIME_TYPE_SIZE + MAX_CODEC_NAME_SIZE + 2 * VOD_INT32_LEN +
 			sizeof(VOD_DASH_MANIFEST_REPRESENTATION_FOOTER) - 1) * media_set->track_count[MEDIA_TYPE_AUDIO] +
