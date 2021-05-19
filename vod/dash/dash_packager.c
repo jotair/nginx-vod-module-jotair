@@ -888,6 +888,16 @@ dash_packager_write_mpd_period(
 				p = vod_copy(p, VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG,
 					sizeof(VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG) - 1);
 			}
+			if(audio_count==0)
+			{
+				p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "main");
+				audio_count++;
+			}
+			else
+			{
+				p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "alternate");
+			}
+
 			break;
 
 		case MEDIA_TYPE_SUBTITLE:
@@ -1033,15 +1043,15 @@ dash_packager_write_mpd_period(
 				break;
 
 			case MEDIA_TYPE_AUDIO:
-				if(audio_count==0)
-				{
-					p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "main");
-					audio_count++;
-				}
-				else
-				{
-					p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "alternate");
-				}
+//				if(audio_count==0)
+//				{
+//					p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "main");
+//					audio_count++;
+//				}
+//				else
+//				{
+//					p = vod_sprintf(p, VOD_DASH_MANIFEST_ROLE_AUDIO, "alternate");
+//				}
 				p = vod_sprintf(p,
 					VOD_DASH_MANIFEST_REPRESENTATION_HEADER_AUDIO,
 					&representation_id,
