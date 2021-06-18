@@ -19,6 +19,7 @@
 #define M3U8_EXT_MEDIA_INSTREAM_ID "INSTREAM-ID=\"%V\""
 
 #define M3U8_EXT_MEDIA_CHANNELS "CHANNELS=\"%uD\","
+#define M3U8_EXT_MEDIA_ATMOS_CHANNELS "CHANNELS=\"16/JOC\","
 
 #define M3U8_EXT_MEDIA_TYPE_AUDIO "AUDIO"
 #define M3U8_EXT_MEDIA_TYPE_SUBTITLES "SUBTITLES"
@@ -904,7 +905,7 @@ m3u8_builder_ext_x_media_tags_get_size(
 		sizeof(M3U8_EXT_MEDIA_LANG) - 1 +
 		LANG_ISO639_3_LEN +
 		sizeof(M3U8_EXT_MEDIA_DEFAULT) - 1 +
-		sizeof(M3U8_EXT_MEDIA_CHANNELS) - 1 + VOD_INT32_LEN +
+		sizeof(M3U8_EXT_MEDIA_CHANNELS) - 1 + VOD_INT32_LEN + 10 +
 		sizeof(M3U8_EXT_MEDIA_URI) - 1 +
 		base_url_len +
 		sizeof("\"\n") - 1) * (adaptation_sets->count[media_type]);
@@ -1018,8 +1019,16 @@ m3u8_builder_ext_x_media_tags_write(
 
 		if (media_type == MEDIA_TYPE_AUDIO)
 		{
+			if((uint32_t)tracks[media_type]->media_info.u.audio.channels>2)
+			{
+				p = vod_sprintf(p, M3U8_EXT_MEDIA_ATMOS_CHANNELS, "16/JOC");
+			}
+			else
+			{
 			p = vod_sprintf(p, M3U8_EXT_MEDIA_CHANNELS, 
 				(uint32_t)tracks[media_type]->media_info.u.audio.channels);
+			//tracks[media_type]->media_info.extra_data.data 
+			}
 		}
 
 		p = vod_copy(p, M3U8_EXT_MEDIA_URI, sizeof(M3U8_EXT_MEDIA_URI) - 1);
