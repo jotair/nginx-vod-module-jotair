@@ -101,6 +101,10 @@
 								"audio_channel_configuration:2011\"\n"			\
 	"          value=\"%uxD\"/>\n"
 
+#define VOD_DASH_MANIFEST_AUDIO_CHANNEL_TAGS_EAC3								\
+	"		<SupplementalProperty schemeIdUri=\"tag:dolby.com,2018:dash:EC3_ExtensionType:2018\" value=\"JOC\"/>\n" \
+    "		<SupplementalProperty schemeIdUri=\"tag:dolby.com,2018:dash:EC3_ExtensionComplexityIndex:2018\" value=\"16\"/>\n"
+
 #define VOD_DASH_MANIFEST_ROLE_AUDIO										\
 	"        <Role schemeIdUri=\"urn:mpeg:dash:role:2011\" value=\"%s\"/>\n"
 
@@ -882,6 +886,7 @@ dash_packager_write_mpd_period(
 			{
 				p = vod_sprintf(p, VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG_EAC3,
 					dash_packager_get_eac3_channel_config(&reference_track->media_info));
+				p = vod_sprintf(p, VOD_DASH_MANIFEST_AUDIO_CHANNEL_TAGS_EAC3, 0);
 			}
 			else
 			{
@@ -1409,6 +1414,7 @@ dash_packager_build_mpd(
 			sizeof(VOD_DASH_MANIFEST_REPRESENTATION_FOOTER) - 1) * media_set->track_count[MEDIA_TYPE_VIDEO] +
 			// audio adaptations
 			(sizeof(VOD_DASH_MANIFEST_ADAPTATION_HEADER_AUDIO_LANG) - 1 + sizeof(VOD_DASH_MANIFEST_AUDIO_CHANNEL_CONFIG_EAC3) - 1 + 2 * VOD_INT32_LEN + LANG_ISO639_3_LEN +
+			sizeof(VOD_DASH_MANIFEST_AUDIO_CHANNEL_TAGS_EAC3) - 1 +
 			sizeof(VOD_DASH_MANIFEST_ADAPTATION_FOOTER) - 1) * context.adaptation_sets.count[ADAPTATION_TYPE_AUDIO] +
 			// audio role
 			(sizeof(VOD_DASH_MANIFEST_ROLE_AUDIO) - 1) + MAX_AUDIO_ROLE_LENGTH +
