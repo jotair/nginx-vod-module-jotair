@@ -111,12 +111,15 @@ In this case, the `load_module` directive should be used in nginx.conf in order 
 Optional recommended settings:
 1. `--with-file-aio` - enable asynchronous I/O support, highly recommended, relevant only to local and mapped modes
 2. `--with-threads` (nginx 1.7.11+) - enable asynchronous file open using thread pool (also requires `vod_open_file_thread_pool` in nginx.conf), relevant only to local and mapped modes
-3. `--with-cc-opt="-O3"` - enable additional compiler optimizations (we saw about 8% reduction in the mp4 parse time
+3. `--with-cc-opt="-O3 -mpopcnt"` - enable additional compiler optimizations (we saw about 8% reduction in the mp4 parse time
 	and frame processing time compared to the nginx default `-O`)
 
 Debug settings:
 1. `--with-debug` - enable debug messages (also requires passing `debug` in the `error_log` directive in nginx.conf).
 2. `--with-cc-opt="-O0"` - disable compiler optimizations (for debugging with gdb)
+
+C Macro Configurations:
+1. `--with-cc-opt="-DNGX_VOD_MAX_TRACK_COUNT=256 -mavx2"` - increase the maximum track count (preferably to multiples of 64). It's recommended to enable vector extensions (AVX2) as well.
 
 ### Installation
 
@@ -144,7 +147,7 @@ For Ubuntu 16.04, 16.10 add this repo:
 For Ubuntu 20.04 add this repo:
 ```
 # wget -O - http://installrepo.kaltura.org/repo/aptn/focal/kaltura-deb-256.gpg.key|apt-key add -
-# echo "deb [arch=amd64] http://installrepo.kaltura.org/repo/aptn/focal propus main" > /etc/apt/sources.list.d/kaltura.list
+# echo "deb [arch=amd64] http://installrepo.kaltura.org/repo/aptn/focal quasar main" > /etc/apt/sources.list.d/kaltura.list
 ```
 
 
@@ -436,7 +439,7 @@ Mandatory fields:
 	
 Optional fields:
 * `id` - a string that identifies the set. The id can be retrieved by `$vod_set_id`.
-* `playlistType` - string, can be set to `live` or `vod`, default is `vod`.
+* `playlistType` - string, can be set to `live`, `vod` or `event` (only supported for HLS playlists), default is `vod`.
 * `durations` - an array of integers representing clip durations in milliseconds.
 	This field is mandatory if the mapping contains more than a single clip per sequence.
 	If specified, this array must contain at least one element and up to 128 elements.
@@ -1118,6 +1121,20 @@ Sets the maximum supported video metadata size (for MP4 - moov atom size)
 
 Sets the limit on the total size of the frames of a single segment
 
+#### vod_max_frame_count
+* **syntax**: `vod_max_frame_count count`
+* **default**: `1048576`
+* **context**: `http`, `server`, `location`
+
+Sets the limit on the total count of the frames read to serve non segment (e.g. playlist) request.
+
+#### vod_segment_max_frame_count
+* **syntax**: `vod_segment_max_frame_count count`
+* **default**: `65536`
+* **context**: `http`, `server`, `location`
+
+Sets the limit on the total count of the frames read to serve segment request.
+
 #### vod_cache_buffer_size
 * **syntax**: `vod_cache_buffer_size size`
 * **default**: `256K`
@@ -1765,6 +1782,13 @@ When enabled, the module ignores any edit lists (elst) in the MP4 file.
 * **context**: `http`, `server`, `location`
 
 When enabled, the module parses the name field of the hdlr MP4 atom, and uses it as the stream label.
+
+#### vod_parse_udta_name
+* **syntax**: `vod_parse_udta_name on/off`
+* **default**: `off`
+* **context**: `http`, `server`, `location`
+
+When enabled, the module parses the name atom child of the udta MP4 atom, and uses it as the stream label.
 
 ### Nginx variables
 
