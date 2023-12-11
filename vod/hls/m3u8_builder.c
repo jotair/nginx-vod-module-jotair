@@ -994,13 +994,12 @@ m3u8_builder_ext_x_media_tags_write(
 				group_index = 0;
 			}
 		}
-		label = &tracks[media_type]->media_info.codec_name;
-//		if (label->len == 0 ||
-//			(media_type == MEDIA_TYPE_AUDIO && !adaptation_sets->multi_audio))
-//		{
-//			//label = &default_label;
-//			label = &flac_label;
-//		}
+
+		label = &tracks[media_type]->media_info.label;
+		if (label->len == 0)
+		{
+			label = &default_label;
+		}
 
 		p = vod_sprintf(p, M3U8_EXT_MEDIA_BASE,
 			type,
@@ -1008,7 +1007,7 @@ m3u8_builder_ext_x_media_tags_write(
 			group_index,
 			label);
 
-		if (tracks[media_type]->media_info.lang_str.len > 0 && (media_type != MEDIA_TYPE_AUDIO || adaptation_sets->multi_audio))
+		if (tracks[media_type]->media_info.lang_str.len > 0)
 		{
 			p = vod_sprintf(p, M3U8_EXT_MEDIA_LANG,
 				&tracks[media_type]->media_info.lang_str);
@@ -1260,7 +1259,7 @@ m3u8_builder_write_iframe_variants(
 
 		video = &tracks[MEDIA_TYPE_VIDEO]->media_info;
 		if (conf->container_format == HLS_CONTAINER_AUTO && 
-			video->codec_id == VOD_CODEC_ID_HEVC)
+			video->codec_id != VOD_CODEC_ID_AVC)
 		{
 			continue;
 		}
