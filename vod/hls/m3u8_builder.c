@@ -998,7 +998,7 @@ m3u8_builder_ext_x_media_tags_write(
 		label = &tracks[media_type]->media_info.label;
 		if (label->len == 0)
 		{
-			label = &default_label;
+			label = &tracks[media_type]->media_info.codec_name;
 		}
 
 		p = vod_sprintf(p, M3U8_EXT_MEDIA_BASE,
