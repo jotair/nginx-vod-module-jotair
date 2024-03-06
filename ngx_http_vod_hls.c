@@ -83,7 +83,8 @@ ngx_http_vod_hls_get_container_format(
 	}
 
 	track = media_set->filtered_tracks;
-	if ((track->media_info.media_type == MEDIA_TYPE_VIDEO && track->media_info.codec_id != VOD_CODEC_ID_AVC) ||
+	if ((track->media_info.media_type == MEDIA_TYPE_VIDEO && track->media_info.codec_id != VOD_CODEC_ID_AVC) || 
+		track->media_info.codec_id == VOD_CODEC_ID_FLAC ||
 		conf->encryption_method == HLS_ENC_SAMPLE_AES_CENC)
 	{
 		return HLS_CONTAINER_FMP4;
