@@ -25,10 +25,10 @@
 	"  <StreamIndex Type=\"%s\" QualityLevels=\"%uD\" Chunks=\"%uD\" Url=\"QualityLevels({bitrate})/Fragments(%s={start time})\">\n"
 
 #define MSS_STREAM_INDEX_HEADER_LABEL \
-	"  <StreamIndex Type=\"%s\" Name=\"%V\" Language=\"%s\" QualityLevels=\"%uD\" Chunks=\"%uD\" Url=\"QualityLevels({bitrate})/Fragments(%s={start time})\">\n"
+	"  <StreamIndex Type=\"%s\" Name=\"%V\" Language=\"%V\" QualityLevels=\"%uD\" Chunks=\"%uD\" Url=\"QualityLevels({bitrate})/Fragments(%s={start time})\">\n"
 
 #define MSS_STREAM_INDEX_HEADER_SUBTITLE \
-	"  <StreamIndex Type=\"text\" Name=\"%V\" Language=\"%s\" QualityLevels=\"%uD\" Chunks=\"%uD\" Subtype=\"CAPT\" Url=\"QualityLevels({bitrate})/Fragments(text={start time})\">\n"
+	"  <StreamIndex Type=\"text\" Name=\"%V\" Language=\"%V\" QualityLevels=\"%uD\" Chunks=\"%uD\" Subtype=\"CAPT\" Url=\"QualityLevels({bitrate})/Fragments(text={start time})\">\n"
 
 #define MSS_VIDEO_QUALITY_LEVEL_HEADER \
 	"    <QualityLevel Index=\"%uD\" Bitrate=\"%uD\" FourCC=\"H264\" MaxWidth=\"%uD\" MaxHeight=\"%uD\" " \
@@ -188,12 +188,12 @@ mss_packager_compare_tracks(uintptr_t bitrate_threshold, const media_info_t* mi1
 			(mi1->u.video.height == mi2->u.video.height);
 	}
 
-	if (mi1->label.len == 0 || mi2->label.len == 0)
+	if (mi1->tags.label.len == 0 || mi2->tags.label.len == 0)
 	{
 		return TRUE;
 	}
 
-	return vod_str_equals(mi1->label, mi2->label);
+	return vod_str_equals(mi1->tags.label, mi2->tags.label);
 }
 
 static void 
@@ -255,7 +255,7 @@ mss_packager_remove_redundant_tracks(
 
 			// prefer to remove a track that doesn't have a label, so that we won't lose a language 
 			//	in case of multi language manifest
-			if (track1->media_info.label.len == 0 || track2->media_info.label.len != 0)
+			if (track1->media_info.tags.label.len == 0 || track2->media_info.tags.label.len != 0)
 			{
 				remove = track1;
 			}
@@ -419,15 +419,15 @@ mss_packager_build_manifest(
 	{
 		cur_track = *adaptation_set->first;
 
-		result_size += cur_track->media_info.label.len;
+		result_size += cur_track->media_info.tags.label.len + cur_track->media_info.tags.lang_str.len;
 	}
 
 	result_size +=
 		(sizeof(MSS_STREAM_INDEX_HEADER) - 1 + 2 * sizeof(MSS_STREAM_TYPE_VIDEO) + 2 * VOD_INT32_LEN +
 		sizeof(MSS_STREAM_INDEX_FOOTER)) * adaptation_sets.count[ADAPTATION_TYPE_VIDEO] + 
-		(sizeof(MSS_STREAM_INDEX_HEADER_LABEL) - 1 + LANG_ISO639_3_LEN + 2 * sizeof(MSS_STREAM_TYPE_AUDIO) + 2 * VOD_INT32_LEN +
+		(sizeof(MSS_STREAM_INDEX_HEADER_LABEL) - 1 + 2 * sizeof(MSS_STREAM_TYPE_AUDIO) + 2 * VOD_INT32_LEN +
 		sizeof(MSS_STREAM_INDEX_FOOTER)) * adaptation_sets.count[ADAPTATION_TYPE_AUDIO] + 
-		(sizeof(MSS_STREAM_INDEX_HEADER_SUBTITLE) - 1 + LANG_ISO639_3_LEN + 2 * VOD_INT32_LEN +
+		(sizeof(MSS_STREAM_INDEX_HEADER_SUBTITLE) - 1 + 2 * VOD_INT32_LEN +
 		sizeof(MSS_STREAM_INDEX_FOOTER)) * adaptation_sets.count[ADAPTATION_TYPE_SUBTITLE];
 
 	// add the quality levels
@@ -491,8 +491,8 @@ mss_packager_build_manifest(
 				p = vod_sprintf(p,
 					MSS_STREAM_INDEX_HEADER_LABEL,
 					MSS_STREAM_TYPE_AUDIO,
-					&cur_track->media_info.label,
-					lang_get_rfc_5646_name(cur_track->media_info.language),
+					&cur_track->media_info.tags.label,
+					&cur_track->media_info.tags.lang_str,
 					adaptation_set->count,
 					segment_durations[adaptation_set->type].segment_count,
 					MSS_STREAM_TYPE_AUDIO);
@@ -513,8 +513,8 @@ mss_packager_build_manifest(
 			cur_track = *adaptation_set->first;
 			p = vod_sprintf(p,
 				MSS_STREAM_INDEX_HEADER_SUBTITLE,
-				&cur_track->media_info.label,
-				lang_get_rfc_5646_name(cur_track->media_info.language),
+				&cur_track->media_info.tags.label,
+				&cur_track->media_info.tags.lang_str,
 				adaptation_set->count,
 				segment_durations[adaptation_set->type].segment_count);
 			break;

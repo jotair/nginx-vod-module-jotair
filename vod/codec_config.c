@@ -1,6 +1,7 @@
 #include "codec_config.h"
 #include "media_format.h"
 #include "bit_read_stream.h"
+#include "mp4/mp4_defs.h"
 
 #define codec_config_copy_string(target, str)	\
 	{											\
@@ -426,15 +427,106 @@ codec_config_get_hevc_codec_name(request_context_t* request_context, media_info_
 	return VOD_OK;
 }
 
+static vod_status_t
+codec_config_get_av1_codec_name(request_context_t* request_context, media_info_t* media_info)
+{
+	bit_reader_state_t reader;
+	uint32_t marker;
+	uint32_t version;
+	uint32_t seq_profile;
+	uint32_t seq_level_idx_0;
+	uint32_t seq_tier_0;
+	uint32_t high_bitdepth;
+	uint32_t twelve_bit;
+	uint32_t bit_depth;
+	u_char* p;
+
+	bit_read_stream_init(&reader, media_info->extra_data.data, media_info->extra_data.len);
+
+	marker = bit_read_stream_get(&reader, 1);
+	if (marker != 1)
+	{
+		vod_log_error(VOD_LOG_ERR, request_context->log, 0,
+			"codec_config_get_av1_codec_name: invalid marker %uD", marker);
+		return VOD_BAD_DATA;
+	}
+
+	version = bit_read_stream_get(&reader, 7);
+	if (version != 1)
+	{
+		vod_log_error(VOD_LOG_ERR, request_context->log, 0,
+			"codec_config_get_av1_codec_name: invalid version %uD", version);
+		return VOD_BAD_DATA;
+	}
+
+	seq_profile = bit_read_stream_get(&reader, 3);
+	seq_level_idx_0 = bit_read_stream_get(&reader, 5);
+	seq_tier_0 = bit_read_stream_get(&reader, 1);
+
+	high_bitdepth = bit_read_stream_get(&reader, 1);
+	twelve_bit = bit_read_stream_get(&reader, 1);
+
+	if (reader.stream.eof_reached)
+	{
+		vod_log_error(VOD_LOG_ERR, request_context->log, 0,
+			"codec_config_get_av1_codec_name: overflow while parsing av1 config");
+		return VOD_BAD_DATA;
+	}
+
+	bit_depth = twelve_bit ? 12 : (high_bitdepth ? 10 : 8);
+
+	p = vod_sprintf(media_info->codec_name.data, "%*s.%uD.%02uD%c.%02uD",
+		(size_t)sizeof(uint32_t),
+		&media_info->format,
+		seq_profile,
+		seq_level_idx_0,
+		seq_tier_0 ? 'H' : 'M',
+		bit_depth);
+
+	media_info->codec_name.len = p - media_info->codec_name.data;
+
+	return VOD_OK;
+}
+
+static vod_status_t
+codec_config_get_dovi_codec_name(request_context_t* request_context, media_info_t* media_info)
+{
+	dovi_video_media_info_t* dovi;
+	u_char* p;
+
+	dovi = &media_info->u.video.dovi;
+
+	p = vod_sprintf(media_info->codec_name.data, "%*s.%02uD.%02uD",
+		(size_t)sizeof(uint32_t),
+		&media_info->format,
+		(uint32_t)dovi->profile,
+		(uint32_t)dovi->level);
+
+	media_info->codec_name.len = p - media_info->codec_name.data;
+
+	return VOD_OK;
+}
+
+
 vod_status_t
 codec_config_get_video_codec_name(request_context_t* request_context, media_info_t* media_info)
 {
 	switch (media_info->codec_id)
 	{
 	case VOD_CODEC_ID_AVC:
+		if (media_info->format == FORMAT_DVA1)
+		{
+			return codec_config_get_dovi_codec_name(request_context, media_info);
+		}
+
 		return codec_config_get_avc_codec_name(request_context, media_info);
 
 	case VOD_CODEC_ID_HEVC:
+		if (media_info->format == FORMAT_DVH1)
+		{
+			return codec_config_get_dovi_codec_name(request_context, media_info);
+		}
+
 		return codec_config_get_hevc_codec_name(request_context, media_info);
 
 	case VOD_CODEC_ID_VP8:
@@ -446,8 +538,7 @@ codec_config_get_video_codec_name(request_context_t* request_context, media_info
 		return VOD_OK;
 
 	case VOD_CODEC_ID_AV1:
-		codec_config_copy_string(media_info->codec_name, "av1");
-		return VOD_OK;
+		return codec_config_get_av1_codec_name(request_context, media_info);
 
 	default:
 		return VOD_UNEXPECTED;
@@ -499,6 +590,10 @@ codec_config_get_audio_codec_name(request_context_t* request_context, media_info
 
 	case VOD_CODEC_ID_EAC3:
 		codec_config_copy_string(media_info->codec_name, "ec-3");
+		return VOD_OK;
+
+	case VOD_CODEC_ID_FLAC:
+		codec_config_copy_string(media_info->codec_name, "fLaC");
 		return VOD_OK;
 
 	default:
