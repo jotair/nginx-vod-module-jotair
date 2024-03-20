@@ -995,7 +995,8 @@ m3u8_builder_ext_x_media_tags_write(
 			}
 		}
 
-		label = &tracks[media_type]->media_info.label;
+		//label = &tracks[media_type]->media_info.label;
+		label = &tracks[media_type]->media_info.codec_name;
 		if (label->len == 0)
 		{
 			label = &tracks[media_type]->media_info.codec_name;
