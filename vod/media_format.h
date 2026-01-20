@@ -302,6 +302,7 @@ typedef struct media_track_s {
 	raw_atom_t raw_atoms[RTA_COUNT];		// mp4 only
 	void* source_clip;
 	media_encryption_t encryption_info;
+	uint32_t audio_group_index;
 	struct media_track_s* next;
 } media_track_t;
 
