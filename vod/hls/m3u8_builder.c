@@ -1035,11 +1035,19 @@ m3u8_builder_ext_x_media_tags_write(
 		}
 		group_index = 0;
 
-		//label = &tracks[media_type]->media_info.label;
-		label = &tracks[media_type]->media_info.codec_name;
+		/* Use media_info.label as the NAME in EXT-X-MEDIA. If it's empty,
+		 * fall back to codec_name, and finally to the default label. */
+		label = &tracks[media_type]->media_info.label;
 		if (label->len == 0)
 		{
-			label = &tracks[media_type]->media_info.codec_name;
+			if (tracks[media_type]->media_info.codec_name.len > 0)
+			{
+				label = &tracks[media_type]->media_info.codec_name;
+			}
+			else
+			{
+				label = &default_label;
+			}
 		}
 
 		p = vod_sprintf(p, M3U8_EXT_MEDIA_BASE,
