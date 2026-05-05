@@ -107,9 +107,9 @@ thumb_grabber_free_state(void* context)
 		av_freep(state->resize_buffer);
 	}
 	av_frame_free(&state->decoded_frame);
-	avcodec_close(state->encoder);
+	avcodec_free_context(&state->encoder);
 	av_free(state->encoder);
-	avcodec_close(state->decoder);
+	avcodec_free_context(&state->decoder);
 	av_free(state->decoder);
 }
 

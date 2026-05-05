@@ -159,7 +159,7 @@ audio_decoder_init(
 void
 audio_decoder_free(audio_decoder_state_t* state)
 {
-	avcodec_close(state->decoder);
+	avcodec_free_context(&state->decoder);
 	av_free(state->decoder);
 	state->decoder = NULL;
 	av_frame_free(&state->decoded_frame);
