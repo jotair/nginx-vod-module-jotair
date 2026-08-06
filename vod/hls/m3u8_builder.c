@@ -1038,12 +1038,19 @@ m3u8_builder_ext_x_media_tags_write(
 		/* Use media_info.label as the NAME in EXT-X-MEDIA. If it's empty,
 		 * fall back to codec_name, and finally to the default label. 
 		 * only for subtitle tracks and still a problem with fLaC*/
-		if(type == M3U8_EXT_MEDIA_TYPE_SUBTITLES)
-		{
-			label = &tracks[media_type]->media_info.label;
-		}
-	
-		if (label->len == 0)
+
+		vod_log_debug2(VOD_LOG_DEBUG_LEVEL, request_context->log, 0,
+			"m3u8_builder_ext_x_media_tags_write: codec_name=%V default_label=%V",
+			&tracks[media_type]->media_info.codec_name,
+			&default_label);
+		label = &tracks[media_type]->media_info.label;
+		//if(type == M3U8_EXT_MEDIA_TYPE_SUBTITLES)
+		//{
+		//	label = &tracks[media_type]->media_info.label;
+		//}
+		if( type == M3U8_EXT_MEDIA_TYPE_AUDIO)
+
+	//	if (label->len == 0)
 		{
 			if (tracks[media_type]->media_info.codec_name.len > 0)
 			{
@@ -1051,7 +1058,7 @@ m3u8_builder_ext_x_media_tags_write(
 			}
 			else
 			{
-				label = &default_label;
+				//label = &default_label;
 			}
 		}
 
