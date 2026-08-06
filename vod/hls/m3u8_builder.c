@@ -1036,7 +1036,8 @@ m3u8_builder_ext_x_media_tags_write(
 		group_index = 0;
 
 		/* Use media_info.label as the NAME in EXT-X-MEDIA. If it's empty,
-		 * fall back to codec_name, and finally to the default label. */
+		 * fall back to codec_name, and finally to the default label. 
+		 * only for subtitle tracks */
 		if(type == M3U8_EXT_MEDIA_TYPE_SUBTITLES)
 		{
 			label = &tracks[media_type]->media_info.label;
