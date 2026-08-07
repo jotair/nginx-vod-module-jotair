@@ -1048,7 +1048,7 @@ m3u8_builder_ext_x_media_tags_write(
 		//{
 		//	label = &tracks[media_type]->media_info.label;
 		//}
-		if( type == M3U8_EXT_MEDIA_TYPE_AUDIO)
+		if( type == M3U8_EXT_MEDIA_TYPE_AUDIO || label->len == 0)
 
 	//	if (label->len == 0)
 		{
