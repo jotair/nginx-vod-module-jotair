@@ -298,6 +298,7 @@ typedef struct media_track_s {
 	uint64_t first_frame_time_offset;
 	int64_t clip_start_time;
 	int64_t original_clip_time;
+	uint32_t audio_group_index;		// used for audio tracks in HLS master playlist generation
 	int32_t clip_from_frame_offset;
 	raw_atom_t raw_atoms[RTA_COUNT];		// mp4 only
 	void* source_clip;
