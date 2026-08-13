@@ -1035,11 +1035,31 @@ m3u8_builder_ext_x_media_tags_write(
 		}
 		group_index = 0;
 
-		//label = &tracks[media_type]->media_info.label;
-		label = &tracks[media_type]->media_info.codec_name;
-		if (label->len == 0)
+		/* Use media_info.label as the NAME in EXT-X-MEDIA. If it's empty,
+		 * fall back to codec_name, and finally to the default label. 
+		 * only for subtitle tracks and still a problem with fLaC*/
+
+		vod_log_debug2(VOD_LOG_DEBUG_LEVEL, request_context->log, 0,
+			"m3u8_builder_ext_x_media_tags_write: codec_name=%V default_label=%V",
+			&tracks[media_type]->media_info.codec_name,
+			&default_label);
+		label = &tracks[media_type]->media_info.label;
+		//if(type == M3U8_EXT_MEDIA_TYPE_SUBTITLES)
+		//{
+		//	label = &tracks[media_type]->media_info.label;
+		//}
+		if( type == M3U8_EXT_MEDIA_TYPE_AUDIO || label->len == 0)
+
+	//	if (label->len == 0)
 		{
-			label = &tracks[media_type]->media_info.codec_name;
+			if (tracks[media_type]->media_info.codec_name.len > 0)
+			{
+				label = &tracks[media_type]->media_info.codec_name;
+			}
+			else
+			{
+				//label = &default_label;
+			}
 		}
 
 		p = vod_sprintf(p, M3U8_EXT_MEDIA_BASE,
@@ -1158,6 +1178,12 @@ m3u8_builder_write_variants(
 			// Note: this is ok because the adaptation types enum is aligned with media types
 			tracks[adaptation_set->type] = cur_track_ptr[0];
 		}
+
+		// Use the specified group_audio_track if provided
+		//if (group_audio_track != NULL)
+		//{
+		//	tracks[MEDIA_TYPE_AUDIO] = group_audio_track;
+		//}
 
 		// output EXT-X-STREAM-INF
 		if (tracks[MEDIA_TYPE_VIDEO] != NULL)
